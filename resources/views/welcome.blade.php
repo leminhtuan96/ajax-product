@@ -113,111 +113,86 @@
     </script>
 </body>
 <script>
-
     $(document).ready(function() {
-                getProducts();
+        getProducts();
 
-                $("#submit-products").on("click", function() {
-                    let formData = new FormData();
-                    formData.append('name', $("#name").val());
-                    formData.append('image', $('#image')[0].files[0]);
-                    formData.append('price', $("#price").val());
-                    formData.append('status', $("#status").val());
-                    formData.append('description', $("#description").val());
-                    $("input[type=text], textarea, input[type=file]").val("");
+        //create
+        $("#submit-products").on("click", function() {
+            let formData = new FormData();
+            formData.append('name', $("#name").val());
+            formData.append('image', $('#image')[0].files[0]);
+            formData.append('price', $("#price").val());
+            formData.append('status', $("#status").val());
+            formData.append('description', $("#description").val());
+            $("input, textarea, select").val("");
+            $.ajax({
+                url: "api/products/create",
+                type: "post",
+                data: formData,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('tbody').prepend('<tr>' +
+                        '<th scope="row" class="product-index">' + response.data.id +
+                        '</th>' +
+                        '<td>' + response.data.name + '</td>' +
+                        '<td><img src="storage/' + response.data.image +
+                        '" width="100px" height="70" alt=""></td>' +
+                        '<td>' + response.data.price + '</td>' +
+                        '<td>' + response.data.status + '</td>' +
+                        '<td>' +
+                        '<a class="me-2 edit-product btn btn-primary" data-id="' +
+                        response.data.id +
+                        '">Edit</a>' +
+                        '<a class="delete-product btn btn-danger" data-id="' +
+                        response.data.id +
+                        '">Delete</a>' +
+                        '</td>' +
+                        '</tr>'
+                    )
+                    changeProductIndex();
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                },
+            });
+
+        });
+
+        //delete
+        $(document).on('click', '.delete-product', function() {
+            let del_id = $(this).attr('data-id');
+            if (del_id) {
+                if (confirm("Are you sure to delete this!")) {
                     $.ajax({
-                        url: "api/products/create",
-                        type: "post",
-                        data: formData,
-                        cache: false,
-                        processData: false,
-                        contentType: false,
+                        url: "api/product/" + del_id,
+                        type: "delete",
+                        dataType: "json",
                         success: function(response) {
-                            console.log(response);
+                            if (response.code == 200) {
+                                let deleted_element = $(
+                                    `.delete-product[data-id=${del_id}]`);
+                                deleted_element.parent().parent().remove();
+                            }
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
                             console.log(textStatus, errorThrown);
                         },
                     });
-                    return getProducts();
-                });
-
-
-
-
-
-                $(document).on('click', '.delete-product', function() {
-                    let del_id = $(this).attr('data-id');
-                    if (del_id) {
-                        if (confirm("Are you sure to delete this!")) {
-                            $.ajax({
-                                url: "api/product/" + del_id,
-                                type: "delete",
-                                dataType: "json",
-                                success: function(response) {
-                                    if (response.code == 200) {
-                                        let deleted_element = $(
-                                            `.delete-product[data-id=${del_id}]`);
-                                        deleted_element.parent().parent().remove();
-                                    }
-                                },
-                                error: function(jqXHR, textStatus, errorThrown) {
-                                    console.log(textStatus, errorThrown);
-                                },
-                            });
-                        }
-                    }
-                    return getProducts();
-                });
-
-
-                function getProducts() {
-                    $.ajax({
-                        type: 'GET',
-                        dataType: "json",
-                        url: 'api/product',
-                        success: function(response, status, xhr) {
-                            if (response.code == 200) {
-                                let data = response.data
-                                let productHtml = "";
-                                data.forEach((element, index) => {
-                                    productHtml += '<tr>' +
-                                        '<th scope="row">' + (index + 1) + '</th>' +
-                                        '<td>' + element.name + '</td>' +
-                                        '<td><img src="storage/' + element.image +
-                                        '" width="100px" height="70" alt=""></td>' +
-                                        '<td>' + element.price + '</td>' +
-                                        '<td>' + element.status + '</td>' +
-                                        '<td>' +
-                                        '<a class="me-2 edit-product btn btn-primary" data-id="' +
-                                        element.id +
-                                        '">Edit</a>' +
-                                        '<a class="delete-product btn btn-danger" data-id="' +
-                                        element
-                                        .id +
-                                        '">Delete</a>' +
-                                        '</td>' +
-                                        '</tr>'
-                                });
-                                $("#products-table tbody").html(productHtml);
-                            }
-                        },
-                        error: function(err, status) {
-                            console.log(err);
-                        }
-                    });
                 }
+            }
+        });
 
-        $(document).on('click','.edit-product', function() {
+
+        //edit
+        $(document).on('click', '.edit-product', function() {
             $('.myCreate').css({
                 'display': 'none',
             })
             $('.myEdit').css({
                 'display': 'block',
             });
-        });
-
-        $(document).on('click', '.edit-product', function() {
             let edit_id = $(this).attr('data-id');
             $.ajax({
                 type: "get",
@@ -237,17 +212,16 @@
             });
         });
 
-
+        //update
         $('#edit-products').on("click", function() {
             let formData = new FormData();
             let edit_id = $('#product-id').val();
-            formData.append('id',$('#product-id').val());
+            formData.append('id', $('#product-id').val());
             formData.append('name', $("#name-edit").val());
             formData.append('image', $('#image-edit')[0].files[0]);
             formData.append('price', $("#price-edit").val());
             formData.append('status', $("#status-edit").val());
             formData.append('description', $("#description-edit").val());
-            $("input[type=text], textarea").val("");
             $.ajax({
                 url: "api/product/edit/" + edit_id,
                 type: "post",
@@ -256,14 +230,83 @@
                 processData: false,
                 contentType: false,
                 success: function(response) {
-                    console.log(response);
+                    let changeEdit = $(
+                        `.edit-product[data-id=${edit_id}]`);
+                    changeEdit.parent().parent().html('');
+                    $('tbody').prepend('<tr>' +
+                        '<th scope="row" class="product-index">' + response.data.id +
+                        '</th>' +
+                        '<td>' + response.data.name + '</td>' +
+                        '<td><img src="storage/' + response.data.image +
+                        '" width="100px" height="70" alt=""></td>' +
+                        '<td>' + response.data.price + '</td>' +
+                        '<td>' + response.data.status + '</td>' +
+                        '<td>' +
+                        '<a class="me-2 edit-product btn btn-primary" data-id="' +
+                        response.data.id +
+                        '">Edit</a>' +
+                        '<a class="delete-product btn btn-danger" data-id="' +
+                        response.data.id +
+                        '">Delete</a>' +
+                        '</td>' +
+                        '</tr>'
+                    )
+
+                    $("input, textarea, select").val("");
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.log(textStatus, errorThrown);
                 },
             });
-            return getProducts();
         });
+
+
+        //index
+        function changeProductIndex() {
+            $('.product-index').text('')
+            $('.product-index').each(function(index, value) {
+                $(value).text(index + 1)
+            });
+        }
+
+        //function
+        function getProducts() {
+            $.ajax({
+                type: 'GET',
+                dataType: "json",
+                url: 'api/product',
+                success: function(response, status, xhr) {
+                    if (response.code == 200) {
+                        let data = response.data
+                        let productHtml = "";
+                        data.forEach((element, index) => {
+                            productHtml += '<tr>' +
+                                '<th scope="row" class="product-index">' + (index + 1) +
+                                '</th>' +
+                                '<td>' + element.name + '</td>' +
+                                '<td><img src="storage/' + element.image +
+                                '" width="100px" height="70" alt=""></td>' +
+                                '<td>' + element.price + '</td>' +
+                                '<td>' + element.status + '</td>' +
+                                '<td>' +
+                                '<a class="me-2 edit-product btn btn-primary" data-id="' +
+                                element.id +
+                                '">Edit</a>' +
+                                '<a class="delete-product btn btn-danger" data-id="' +
+                                element
+                                .id +
+                                '">Delete</a>' +
+                                '</td>' +
+                                '</tr>'
+                        });
+                        $("#products-table tbody").html(productHtml);
+                    }
+                },
+                error: function(err, status) {
+                    console.log(err);
+                }
+            });
+        }
     });
 </script>
 
