@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-   
+
     function index(Request $request,) {
         try {
-            $products = Product::all();
+            $products = Product::orderBy('id','desc')->get();
             return response()->json([
                 "code" => 200,
                 "data" => $products

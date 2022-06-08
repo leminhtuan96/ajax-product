@@ -175,6 +175,7 @@
                                     `.delete-product[data-id=${del_id}]`);
                                 deleted_element.parent().parent().remove();
                             }
+                            changeProductIndex();
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
                             console.log(textStatus, errorThrown);
