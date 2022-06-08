@@ -212,7 +212,7 @@
             });
         });
 
-        $('#cancel-products').on('click',function(){
+        $('#cancel-products').on('click', function() {
             $('.myCreate').css({
                 'display': 'block'
             })
@@ -239,11 +239,12 @@
                 processData: false,
                 contentType: false,
                 success: function(response) {
-                    let changeEdit = $(
-                        `.edit-product[data-id=${edit_id}]`);
-                    changeEdit.parent().parent().html('');
-                    $('tbody').prepend('<tr>' +
-                        '<th scope="row" class="product-index">' + response.data.id +
+                    let editProductRow = $(
+                        `.edit-product[data-id=${edit_id}]`).parent().parent();
+                    editProductRow.html('');
+
+                    let newProductHtml = '<th scope="row" class="product-index">' + response
+                        .data.id +
                         '</th>' +
                         '<td>' + response.data.name + '</td>' +
                         '<td><img src="storage/' + response.data.image +
@@ -257,11 +258,11 @@
                         '<a class="delete-product btn btn-danger" data-id="' +
                         response.data.id +
                         '">Delete</a>' +
-                        '</td>' +
-                        '</tr>'
-                    )
-
+                        '</td>';
+                        editProductRow.html(newProductHtml);
                     $("input, textarea, select").val("");
+
+                    changeProductIndex();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.log(textStatus, errorThrown);
