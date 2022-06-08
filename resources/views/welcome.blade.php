@@ -77,7 +77,7 @@
             </div>
 
             <button type="button" id="edit-products" class="btn btn-primary mt-3">Update</button>
-            <button type="button" class="cancel-products btn btn-warning mt-3">Cancel</button>
+            <button type="button" id="cancel-products" class="btn btn-warning mt-3">Cancel</button>
 
 
         </form>
@@ -116,7 +116,7 @@
     $(document).ready(function() {
         getProducts();
 
-        //create
+        //create product
         $("#submit-products").on("click", function() {
             let formData = new FormData();
             formData.append('name', $("#name").val());
@@ -160,7 +160,7 @@
 
         });
 
-        //delete
+        //delete product
         $(document).on('click', '.delete-product', function() {
             let del_id = $(this).attr('data-id');
             if (del_id) {
@@ -185,7 +185,7 @@
         });
 
 
-        //edit
+        //edit product
         $(document).on('click', '.edit-product', function() {
             $('.myCreate').css({
                 'display': 'none',
@@ -212,7 +212,16 @@
             });
         });
 
-        //update
+        $('#cancel-products').on('click',function(){
+            $('.myCreate').css({
+                'display': 'block'
+            })
+            $('.myEdit').css({
+                'display': 'none'
+            })
+        });
+
+        //update product
         $('#edit-products').on("click", function() {
             let formData = new FormData();
             let edit_id = $('#product-id').val();
@@ -261,7 +270,7 @@
         });
 
 
-        //index
+        //sửa id index
         function changeProductIndex() {
             $('.product-index').text('')
             $('.product-index').each(function(index, value) {
@@ -269,7 +278,7 @@
             });
         }
 
-        //function
+        //function show list
         function getProducts() {
             $.ajax({
                 type: 'GET',
